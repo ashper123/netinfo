@@ -1,6 +1,6 @@
 import os
 import sys
-import json
+
 import pytest
 
 # Add parent directory to path to import netinfo

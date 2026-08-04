@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.fixture
 def windows_ipconfig_output():
     return """

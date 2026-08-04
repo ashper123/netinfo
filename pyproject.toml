@@ -7,7 +7,7 @@ name = "netinfo"
 version = "2.0.0"
 description = "Simple command. Rich information. Modern cross-platform network toolkit CLI & JSON generator."
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
 requires-python = ">=3.8"
 keywords = [
     "network",
@@ -34,7 +34,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "Intended Audience :: Information Technology",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
@@ -52,12 +51,12 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-username/netinfo"
-Documentation = "https://github.com/your-username/netinfo#readme"
-Repository = "https://github.com/your-username/netinfo.git"
-Changelog = "https://github.com/your-username/netinfo/blob/main/CHANGELOG.md"
-Tracker = "https://github.com/your-username/netinfo/issues"
-Discussions = "https://github.com/your-username/netinfo/discussions"
+Homepage = "https://github.com/ashper123/netinfo"
+Documentation = "https://ashper123.github.io/netinfo/"
+Repository = "https://github.com/ashper123/netinfo.git"
+Changelog = "https://github.com/ashper123/netinfo/blob/main/CHANGELOG.md"
+Tracker = "https://github.com/ashper123/netinfo/issues"
+Discussions = "https://github.com/ashper123/netinfo/discussions"
 
 [project.scripts]
 netinfo = "netinfo:main"
@@ -71,10 +70,28 @@ python_files = "test_*.py"
 addopts = "-v --tb=short"
 
 [tool.ruff]
-line-length = 100
+line-length = 115
 target-version = "py38"
 
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "S", "BLE", "SIM", "PIE", "PLW", "RUF"]
+ignore = [
+    "BLE001",  # broad exception catches are intentional for cross-platform resilience
+    "S110",    # try-except-pass patterns are intentional for cross-platform resilience
+    "S603",    # subprocess with list args is safe — no shell injection risk
+    "SIM105",  # contextlib.suppress is less readable in some defensive contexts
+    "SIM113",  # manual counter used for progress reporting, enumerate not applicable
+    "PLW0603", # global cache pattern is intentional for ipconfig output caching
+    "PLW1510", # subprocess.run check=False is correct when we check returncode ourselves
+    "PLW2901", # loop variable reassignment (line.strip()) is intentional and readable
+    "E501",    # long lines in argparse/format strings — acceptable at 115 chars
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/conftest.py" = ["W291", "E501"]  # trailing whitespace is intentional in mock ipconfig/ifconfig fixtures
+"tests/test_netinfo.py" = ["S101", "E501"]  # assert expected in tests; long assertion lines are readable as-is
+
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true

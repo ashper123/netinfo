@@ -36,3 +36,9 @@ coverage.xml
 # Local snapshots & exports
 *.json
 !example_snapshot.json
+
+# MkDocs generated site
+site/
+
+# Local dev helpers
+powershell.cmd

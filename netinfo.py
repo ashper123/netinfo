@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 netinfo.py — Network Information Toolkit
 ========================================
@@ -43,6 +42,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.error import URLError
 from urllib.request import Request, urlopen
+
 
 # ----------------------------------------------------------------------------
 # ANSI Styling Helper (Zero Dependencies)
@@ -142,8 +142,8 @@ COMMON_OUI = {
 # ----------------------------------------------------------------------------
 def http_get(url, timeout=5):
     """Fetch a URL and return its body as text."""
-    req = Request(url, headers={"User-Agent": "netinfo/2.0"})
-    with urlopen(req, timeout=timeout) as resp:
+    req = Request(url, headers={"User-Agent": "netinfo/2.0"})  # noqa: S310
+    with urlopen(req, timeout=timeout) as resp:  # noqa: S310
         return resp.read().decode("utf-8", errors="replace").strip()
 
 
@@ -434,7 +434,7 @@ def _parse_linux_ip_addr(output):
         m_brd = re.search(r"brd\s+(\d+\.\d+\.\d+\.\d+)", line)
         if m_brd:
             current["broadcast"] = m_brd.group(1)
-    result = [i for i in interfaces if i["ip"]]
+    result = [i for i in interfaces if i["ip"] and i["name"] not in ("lo", "lo0")]
 
     # --- Merge IPv6 addresses by interface name (additive) ---
     # Build a name->entry map for fast lookup.
@@ -487,7 +487,7 @@ def _parse_mac_ifconfig(output):
     raw_v6_by_iface = {}   # name -> [raw_addr, ...]
 
     for line in output.splitlines():
-        if line and not line[0] in ("\t", " "):
+        if line and line[0] not in ("\t", " "):
             current = {"name": line.split(":")[0], "ip": None,
                        "prefix": None, "broadcast": None}
             interfaces.append(current)
@@ -510,10 +510,10 @@ def _parse_mac_ifconfig(output):
         if m6:
             raw_v6_by_iface.setdefault(current["name"], []).append(m6.group(1))
 
-    result = [i for i in interfaces if i["ip"]]
+    result = [i for i in interfaces if i["ip"] and i["name"] not in ("lo", "lo0")]
 
     # Classify and attach IPv6 buckets to each interface that has an IPv4 addr.
-    result_names = {i["name"] for i in result}
+    {i["name"] for i in result}
     for i in result:
         addrs = raw_v6_by_iface.get(i["name"], [])
         g, u, ll = _classify_ipv6_addresses(addrs)
@@ -537,6 +537,7 @@ def _parse_windows_ipconfig(output):
     """
     interfaces, current = [], None
     raw_v6_by_name = {}   # adapter name -> [raw_addr, ...]
+    in_gateway_block = False
 
     for raw in output.splitlines():
         line = raw.strip()
@@ -545,6 +546,7 @@ def _parse_windows_ipconfig(output):
             current = {"name": m_adapter.group(2).strip(), "ip": None,
                        "prefix": None, "broadcast": None, "gateway": None}
             interfaces.append(current)
+            in_gateway_block = False
             continue
         if current is None:
             continue
@@ -555,9 +557,22 @@ def _parse_windows_ipconfig(output):
         m_mask = re.match(r"Subnet Mask[^:]*:\s*(\d+\.\d+\.\d+\.\d+)", line)
         if m_mask:
             current["prefix"] = ipaddress.IPv4Network(f"0.0.0.0/{m_mask.group(1)}").prefixlen
-        m_gw = re.match(r"Default Gateway[^:]*:\s*(\d+\.\d+\.\d+\.\d+)", line)
-        if m_gw:
-            current["gateway"] = m_gw.group(1)
+
+        # --- Default Gateway ---
+        if "Default Gateway" in line:
+            in_gateway_block = True
+            parts = line.split(":", 1)
+            if len(parts) > 1 and parts[1].strip():
+                gw_val = parts[1].strip()
+                if re.match(r"^\d+\.\d+\.\d+\.\d+$", gw_val):
+                    current["gateway"] = gw_val
+        elif in_gateway_block:
+            if line and ":" not in raw:
+                if re.match(r"^\d+\.\d+\.\d+\.\d+$", line):
+                    current["gateway"] = line
+            elif ":" in raw:
+                in_gateway_block = False
+
         # --- IPv6 (additive) ---
         # Windows line: '   IPv6 Address. . . . . . . . . . . : 2001:db8::1(Preferred)'
         # Also catches temporary and link-local variants.
@@ -618,11 +633,11 @@ def get_default_gateway(interfaces):
         pass
 
     if IS_LINUX:
-        m = re.search(r"^default\s+via\s+(\S+)", run_cmd(["ip", "route", "show"]), re.M)
+        m = re.search(r"^default\s+via\s+(\S+)", run_cmd(["ip", "route", "show"]), re.MULTILINE)
         if m:
             return m.group(1)
     if IS_MAC:
-        m = re.search(r"^default\s+(\S+)", run_cmd(["netstat", "-rn", "-f", "inet"]), re.M)
+        m = re.search(r"^default\s+(\S+)", run_cmd(["netstat", "-rn", "-f", "inet"]), re.MULTILINE)
         if m:
             return m.group(1)
     if IS_WINDOWS:
@@ -991,7 +1006,7 @@ def _get_dns_servers():
                 elif in_dns_block:
                     # Windows indents subsequent DNS server IPs under the same adapter
                     stripped = line.strip()
-                    if stripped and not ":" in line and re.match(r"^[0-9a-fA-F:\.]+$", stripped):
+                    if stripped and ":" not in line and re.match(r"^[0-9a-fA-F:\.]+$", stripped):
                         if stripped not in servers:
                             servers.append(stripped)
                     elif ":" in line and not re.match(r"^[0-9a-fA-F:\.]+$", stripped):
@@ -1016,7 +1031,7 @@ def _get_dns_servers():
 
             for line in content.splitlines():
                 line = line.strip()
-                if line.startswith("#") or line.startswith(";"):
+                if line.startswith(("#", ";")):
                     continue
                 if line.startswith("nameserver"):
                     parts = line.split()
@@ -1602,7 +1617,7 @@ def pretty_print(report, colors=None):
         print("  " + "-" * 62)
         for d in devices:
             host = d.get("hostname") or "-"
-            print(f"  {d['ip']:<15} {d['mac']:<19} {str(d.get('vendor') or '-'):<14} {host}")
+            print(f"  {d['ip']:<15} {d['mac']:<19} {d.get('vendor') or '-'!s:<14} {host}")
     else:
         print("  none found - try --sweep to wake sleeping hosts")
 

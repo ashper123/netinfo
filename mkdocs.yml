@@ -1,8 +1,8 @@
 site_name: netinfo — Network Information Toolkit
 site_description: Zero-dependency, cross-platform network diagnostic CLI & JSON engine for Python 3.8+.
-site_url: https://your-username.github.io/netinfo/
-repo_url: https://github.com/your-username/netinfo
-repo_name: your-username/netinfo
+site_url: https://ashper123.github.io/netinfo/
+repo_url: https://github.com/ashper123/netinfo
+repo_name: ashper123/netinfo
 
 theme:
   name: material
@@ -31,9 +31,8 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          setup_commands:
-            - import sys
-            - sys.path.append('.')
+          options:
+            paths: [.]
 
 markdown_extensions:
   - admonition
