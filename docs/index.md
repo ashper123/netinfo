@@ -26,12 +26,12 @@ Welcome to the official documentation for **`netinfo`** (Network Information Too
 === "Standalone Script"
 
     ```bash
-    curl -O https://raw.githubusercontent.com/your-username/netinfo/main/netinfo.py
+    curl -O https://raw.githubusercontent.com/ashper123/netinfo/main/netinfo.py
     python3 netinfo.py
     ```
 
 === "Docker"
 
     ```bash
-    docker run --rm --net=host ghcr.io/your-username/netinfo:latest
+    docker run --rm --net=host ghcr.io/ashper123/netinfo:latest
     ```

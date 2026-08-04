@@ -28,7 +28,10 @@ theme:
 
 plugins:
   - search
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [.]
 
 markdown_extensions:
   - admonition

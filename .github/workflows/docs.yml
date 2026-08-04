@@ -7,8 +7,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
   deploy:
@@ -18,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # full history for git-based deploy
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,18 +27,21 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-mkdocs-${{ hashFiles('**/requirements*.txt') }}
+          key: ${{ runner.os }}-pip-docs-${{ hashFiles('**/requirements*.txt') }}
           restore-keys: |
-            ${{ runner.os }}-pip-mkdocs-
+            ${{ runner.os }}-pip-docs-
 
-      - name: Install dependencies
+      - name: Install documentation dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install mkdocs mkdocs-material pymdown-extensions mkdocstrings[python]
-          pip install -e .
+          pip install \
+            "mkdocs>=1.6,<2" \
+            "mkdocs-material>=9,<10" \
+            "pymdown-extensions>=10" \
+            "mkdocstrings[python]>=1"
 
-      - name: Deploy documentation to GitHub Pages
-        run: mkdocs gh-deploy --force --clean --verbose
+      - name: Build and deploy documentation
+        run: mkdocs gh-deploy --force --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PYTHONPATH: .
+          PYTHONPATH: ${{ github.workspace }}
