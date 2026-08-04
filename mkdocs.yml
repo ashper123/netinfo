@@ -32,7 +32,7 @@ plugins:
       handlers:
         python:
           options:
-            paths: [.]
+            import_paths: [.]
 
 markdown_extensions:
   - admonition
