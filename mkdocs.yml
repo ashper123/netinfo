@@ -1,0 +1,56 @@
+site_name: netinfo — Network Information Toolkit
+site_description: Zero-dependency, cross-platform network diagnostic CLI & JSON engine for Python 3.8+.
+site_url: https://your-username.github.io/netinfo/
+repo_url: https://github.com/your-username/netinfo
+repo_name: your-username/netinfo
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: cyan
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: cyan
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - import sys
+            - sys.path.append('.')
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Overview: index.md
+  - CLI Reference: cli.md
+  - API Reference: api.md
+  - Performance & Benchmarks: benchmarks.md

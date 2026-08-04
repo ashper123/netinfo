@@ -1,0 +1,2 @@
+# Optional third-party dependency for direct interface binding
+netifaces>=0.11.0; python_version < "3.12"

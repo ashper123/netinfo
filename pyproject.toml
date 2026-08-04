@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netinfo"
+version = "2.0.0"
+description = "Simple command. Rich information. Modern cross-platform network toolkit CLI & JSON generator."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.8"
+keywords = [
+    "network",
+    "cli",
+    "ip",
+    "ipv6",
+    "wifi",
+    "dns",
+    "mac-address",
+    "arp",
+    "ping-sweep",
+    "subnet",
+    "gateway",
+    "sysadmin",
+    "devops",
+    "diagnostics"
+]
+authors = [
+    { name = "netinfo Contributors", email = "maintainers@netinfo.dev" }
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Networking",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+    "Typing :: Typed"
+]
+
+[project.urls]
+Homepage = "https://github.com/your-username/netinfo"
+Documentation = "https://github.com/your-username/netinfo#readme"
+Repository = "https://github.com/your-username/netinfo.git"
+Changelog = "https://github.com/your-username/netinfo/blob/main/CHANGELOG.md"
+Tracker = "https://github.com/your-username/netinfo/issues"
+Discussions = "https://github.com/your-username/netinfo/discussions"
+
+[project.scripts]
+netinfo = "netinfo:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
